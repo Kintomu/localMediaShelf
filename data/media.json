@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "title": "Adventure Movie",
+    "type": "movie",
+    "genre": "Adventure",
+    "mediaPath": "",
+    "watched": false,
+    "favorite": false,
+    "tmdbId": null
+  },
+  {
+    "id": 2,
+    "title": "Documentary",
+    "type": "movie",
+    "genre": "Documentary",
+    "mediaPath": "",
+    "watched": true,
+    "favorite": false,
+    "tmdbId": null
+  },
+  {
+    "id": 3,
+    "title": "The Show",
+    "type": "tv",
+    "genre": "Comedy",
+    "mediaPath": "",
+    "watched": false,
+    "favorite": true,
+    "tmdbId": null
+  }
+]
