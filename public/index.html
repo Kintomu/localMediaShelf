@@ -8,8 +8,20 @@
   </head>
   <body>
     <main class="page-shell">
-      <h1>Local Media Shelf</h1>
+      <header class="page-header">
+        <h1>Local Media Shelf</h1>
+        <p>A small collection of movies and shows.</p>
+      </header>
+
+      <section aria-labelledby="library-heading">
+        <h2 id="library-heading">Your Library</h2>
+        <p id="app-status" class="status-message" role="status">
+          Loading your media...
+        </p>
+        <div id="media-grid" class="media-grid"></div>
+      </section>
     </main>
+
     <script src="/js/app.js"></script>
   </body>
 </html>
