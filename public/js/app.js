@@ -1,5 +1,20 @@
 const appStatus = document.querySelector("#app-status");
 const mediaGrid = document.querySelector("#media-grid");
+const searchInput = document.querySelector("#search-input");
+
+let allMediaItems = [];
+
+function filterMedia(mediaItems, searchTerm) {
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
+  if (normalizedSearchTerm === "") {
+    return mediaItems;
+  }
+
+  return mediaItems.filter((mediaItem) => {
+    return mediaItem.title.toLowerCase().includes(normalizedSearchTerm);
+  });
+}
 
 function createStatusBadge(label, isActive) {
   const badge = document.createElement("span");
@@ -37,11 +52,14 @@ function createMediaCard(mediaItem) {
   return card;
 }
 
-function renderMediaItems(mediaItems) {
+function renderMediaItems(
+  mediaItems,
+  emptyMessage = "Your media library is empty."
+) {
   mediaGrid.replaceChildren();
 
   if (mediaItems.length === 0) {
-    appStatus.textContent = "Your media library is empty.";
+    appStatus.textContent = emptyMessage;
     return;
   }
 
@@ -52,6 +70,13 @@ function renderMediaItems(mediaItems) {
   appStatus.textContent = `Showing ${mediaItems.length} media items.`;
 }
 
+function handleSearchInput(event) {
+  const searchTerm = event.target.value;
+  const filteredMediaItems = filterMedia(allMediaItems, searchTerm);
+
+  renderMediaItems(filteredMediaItems, "No titles match your search.");
+}
+
 async function loadMediaItems() {
   try {
     const response = await fetch("/api/media");
@@ -60,8 +85,8 @@ async function loadMediaItems() {
       throw new Error(`Media request failed with status ${response.status}.`);
     }
 
-    const mediaItems = await response.json();
-    renderMediaItems(mediaItems);
+    allMediaItems = await response.json();
+    renderMediaItems(allMediaItems);
   } catch (error) {
     console.error("Unable to load media items:", error);
     appStatus.classList.add("status-message--error");
@@ -69,4 +94,5 @@ async function loadMediaItems() {
   }
 }
 
+searchInput.addEventListener("input", handleSearchInput);
 loadMediaItems();
