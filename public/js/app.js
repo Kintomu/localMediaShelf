@@ -1,6 +1,12 @@
 const appStatus = document.querySelector("#app-status");
 const mediaGrid = document.querySelector("#media-grid");
 const searchInput = document.querySelector("#search-input");
+const scanForm = document.querySelector("#scan-form");
+const scanPathInput = document.querySelector("#scan-path");
+const scanButton = document.querySelector("#scan-button");
+const scanStatus = document.querySelector("#scan-status");
+const scanPreview = document.querySelector("#scan-preview");
+const scanResults = document.querySelector("#scan-results");
 
 let allMediaItems = [];
 
@@ -14,6 +20,83 @@ function filterMedia(mediaItems, searchTerm) {
   return mediaItems.filter((mediaItem) => {
     return mediaItem.title.toLowerCase().includes(normalizedSearchTerm);
   });
+}
+
+function formatScanSourceType(sourceType) {
+  if (sourceType === "iso") {
+    return "ISO";
+  }
+
+  if (sourceType === "mp4") {
+    return "MP4";
+  }
+
+  return "Blu-ray folder";
+}
+
+function renderScanPreview(candidates) {
+  scanResults.replaceChildren();
+
+  if (candidates.length === 0) {
+    scanPreview.hidden = true;
+    scanStatus.textContent = "No supported media was found in that folder.";
+    return;
+  }
+
+  candidates.forEach((candidate) => {
+    const listItem = document.createElement("li");
+    const title = document.createElement("span");
+    const sourceType = document.createElement("span");
+
+    title.textContent = candidate.title;
+    sourceType.className = "scan-source-type";
+    sourceType.textContent = formatScanSourceType(candidate.sourceType);
+
+    listItem.append(title, sourceType);
+    scanResults.append(listItem);
+  });
+
+  scanPreview.hidden = false;
+  scanStatus.textContent = `Found ${candidates.length} candidates. Nothing has been saved yet.`;
+}
+
+async function handleScanSubmit(event) {
+  event.preventDefault();
+
+  const directoryPath = scanPathInput.value.trim();
+
+  scanStatus.classList.remove("status-message--error");
+  scanPreview.hidden = true;
+
+  if (directoryPath === "") {
+    scanStatus.classList.add("status-message--error");
+    scanStatus.textContent = "Enter an absolute folder path before scanning.";
+    return;
+  }
+
+  scanButton.disabled = true;
+  scanStatus.textContent = "Scanning folder...";
+
+  try {
+    const response = await fetch("/api/media/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ directoryPath })
+    });
+    const scanData = await response.json();
+
+    if (!response.ok) {
+      throw new Error(scanData.error || "The folder could not be scanned.");
+    }
+
+    renderScanPreview(scanData.candidates);
+  } catch (error) {
+    console.error("Unable to scan media folder:", error);
+    scanStatus.classList.add("status-message--error");
+    scanStatus.textContent = error.message;
+  } finally {
+    scanButton.disabled = false;
+  }
 }
 
 function createStatusBadge(label, isActive) {
@@ -96,4 +179,5 @@ async function loadMediaItems() {
 }
 
 searchInput.addEventListener("input", handleSearchInput);
+scanForm.addEventListener("submit", handleScanSubmit);
 loadMediaItems();

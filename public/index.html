@@ -13,6 +13,34 @@
         <p>A small collection of movies and shows.</p>
       </header>
 
+      <section class="scan-section" aria-labelledby="scan-heading">
+        <h2 id="scan-heading">Scan a Media Folder</h2>
+        <p class="scan-description">
+          Preview supported media before adding anything to the library.
+        </p>
+
+        <form id="scan-form">
+          <label for="scan-path">Absolute folder path</label>
+          <div class="scan-controls">
+            <input
+              id="scan-path"
+              type="text"
+              placeholder="E:\Media\Backup"
+              autocomplete="off"
+              required
+            >
+            <button id="scan-button" type="submit">Scan folder</button>
+          </div>
+        </form>
+
+        <p id="scan-status" class="status-message" role="status"></p>
+
+        <div id="scan-preview" class="scan-preview" hidden>
+          <h3>Scan Preview</h3>
+          <ul id="scan-results"></ul>
+        </div>
+      </section>
+
       <section aria-labelledby="library-heading">
         <h2 id="library-heading">Your Library</h2>
 
