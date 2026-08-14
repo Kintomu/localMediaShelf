@@ -142,6 +142,61 @@ h1 {
   color: #d1d5db;
 }
 
+.tmdb-section {
+  margin: 2rem 0;
+  padding: 1.25rem;
+  border-radius: 0.5rem;
+  background-color: #111827;
+}
+
+.tmdb-section h2 {
+  font-size: 1.25rem;
+}
+
+.tmdb-content {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.tmdb-content[hidden] {
+  display: none;
+}
+
+.tmdb-content img {
+  width: 100%;
+  max-width: 12rem;
+  border-radius: 0.5rem;
+}
+
+.tmdb-content img[hidden] {
+  display: none;
+}
+
+.tmdb-overview {
+  color: #d1d5db;
+  line-height: 1.5;
+}
+
+.tmdb-facts {
+  margin: 1rem 0 0;
+}
+
+.tmdb-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid #374151;
+}
+
+.tmdb-facts dt {
+  font-weight: bold;
+}
+
+.tmdb-facts dd {
+  margin: 0;
+}
+
 .media-facts {
   margin: 2rem 0 0;
 }
@@ -206,5 +261,13 @@ h1 {
 
   .media-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tmdb-content {
+    grid-template-columns: minmax(8rem, 12rem) 1fr;
+  }
+
+  .tmdb-content.tmdb-content--no-poster {
+    grid-template-columns: 1fr;
   }
 }

@@ -5,6 +5,13 @@ const mediaType = document.querySelector("#media-type");
 const mediaGenre = document.querySelector("#media-genre");
 const watchedStatus = document.querySelector("#watched-status");
 const favoriteStatus = document.querySelector("#favorite-status");
+const tmdbStatus = document.querySelector("#tmdb-status");
+const tmdbContent = document.querySelector("#tmdb-content");
+const tmdbPoster = document.querySelector("#tmdb-poster");
+const tmdbTitle = document.querySelector("#tmdb-title");
+const tmdbOverview = document.querySelector("#tmdb-overview");
+const tmdbReleaseDate = document.querySelector("#tmdb-release-date");
+const tmdbRating = document.querySelector("#tmdb-rating");
 const watchedButton = document.querySelector("#watched-button");
 const favoriteButton = document.querySelector("#favorite-button");
 const actionStatus = document.querySelector("#action-status");
@@ -23,6 +30,41 @@ function formatMediaType(type) {
 function showDetailsError(message) {
   detailsStatus.classList.add("status-message--error");
   detailsStatus.textContent = message;
+}
+
+function showTmdbError(message) {
+  tmdbContent.hidden = true;
+  tmdbStatus.hidden = false;
+  tmdbStatus.classList.add("status-message--error");
+  tmdbStatus.textContent = message;
+}
+
+function formatRating(rating) {
+  return typeof rating === "number" ? `${rating.toFixed(1)} / 10` : "Not available";
+}
+
+function renderTmdbMetadata(metadata) {
+  tmdbTitle.textContent = metadata.title;
+  tmdbOverview.textContent = metadata.overview || "No overview is available.";
+  tmdbReleaseDate.textContent = metadata.releaseDate || "Not available";
+  tmdbRating.textContent = formatRating(metadata.rating);
+  tmdbContent.classList.toggle(
+    "tmdb-content--no-poster",
+    !metadata.posterPath
+  );
+
+  if (metadata.posterPath) {
+    tmdbPoster.src = `https://image.tmdb.org/t/p/w500${metadata.posterPath}`;
+    tmdbPoster.alt = `${metadata.title} poster`;
+    tmdbPoster.hidden = false;
+  } else {
+    tmdbPoster.removeAttribute("src");
+    tmdbPoster.alt = "";
+    tmdbPoster.hidden = true;
+  }
+
+  tmdbStatus.hidden = true;
+  tmdbContent.hidden = false;
 }
 
 function updateStatusButtons(mediaItem) {
@@ -46,6 +88,33 @@ function renderMediaDetails(mediaItem) {
   document.title = `${mediaItem.title} | Local Media Shelf`;
   detailsStatus.hidden = true;
   mediaDetails.hidden = false;
+}
+
+async function loadTmdbMetadata(mediaItem) {
+  const searchParameters = new URLSearchParams({
+    query: mediaItem.title,
+    type: mediaItem.type
+  });
+
+  try {
+    const response = await fetch(`/api/tmdb/search?${searchParameters}`);
+
+    if (response.status === 404) {
+      showTmdbError("No TMDB match was found for this title.");
+      return;
+    }
+
+    if (!response.ok) {
+      showTmdbError("TMDB metadata is currently unavailable.");
+      return;
+    }
+
+    const metadata = await response.json();
+    renderTmdbMetadata(metadata);
+  } catch (error) {
+    console.error("Unable to load TMDB metadata:", error);
+    showTmdbError("TMDB metadata is currently unavailable.");
+  }
 }
 
 function setStatusButtonsDisabled(isDisabled) {
@@ -111,6 +180,7 @@ async function loadMediaDetails() {
 
     const mediaItem = await response.json();
     renderMediaDetails(mediaItem);
+    await loadTmdbMetadata(mediaItem);
   } catch (error) {
     console.error("Unable to load media details:", error);
     showDetailsError("Sorry, the media details could not be loaded.");
@@ -127,6 +197,11 @@ favoriteButton.addEventListener("click", () => {
   if (currentMediaItem) {
     updateMediaStatus("favorite", !currentMediaItem.favorite);
   }
+});
+
+tmdbPoster.addEventListener("error", () => {
+  tmdbPoster.hidden = true;
+  tmdbContent.classList.add("tmdb-content--no-poster");
 });
 
 loadMediaDetails();

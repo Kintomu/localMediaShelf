@@ -22,6 +22,33 @@
           <span id="media-genre"></span>
         </p>
 
+        <section class="tmdb-section" aria-labelledby="tmdb-heading">
+          <h2 id="tmdb-heading">TMDB Metadata</h2>
+          <p id="tmdb-status" class="status-message" role="status">
+            Loading TMDB metadata...
+          </p>
+
+          <div id="tmdb-content" class="tmdb-content" hidden>
+            <img id="tmdb-poster" alt="" hidden>
+
+            <div>
+              <h3 id="tmdb-title"></h3>
+              <p id="tmdb-overview" class="tmdb-overview"></p>
+
+              <dl class="tmdb-facts">
+                <div>
+                  <dt>Release date</dt>
+                  <dd id="tmdb-release-date"></dd>
+                </div>
+                <div>
+                  <dt>Rating</dt>
+                  <dd id="tmdb-rating"></dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </section>
+
         <dl class="media-facts">
           <div>
             <dt>Watched</dt>
