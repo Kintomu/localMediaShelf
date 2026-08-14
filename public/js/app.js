@@ -1,6 +1,7 @@
 const appStatus = document.querySelector("#app-status");
 const mediaGrid = document.querySelector("#media-grid");
 const searchInput = document.querySelector("#search-input");
+const deleteAllButton = document.querySelector("#delete-all-button");
 const scanForm = document.querySelector("#scan-form");
 const scanPathInput = document.querySelector("#scan-path");
 const scanButton = document.querySelector("#scan-button");
@@ -182,6 +183,7 @@ function renderMediaItems(
   emptyMessage = "Your media library is empty."
 ) {
   mediaGrid.replaceChildren();
+  deleteAllButton.disabled = allMediaItems.length === 0;
 
   if (mediaItems.length === 0) {
     appStatus.textContent = emptyMessage;
@@ -202,6 +204,43 @@ function handleSearchInput(event) {
   renderMediaItems(filteredMediaItems, "No titles match your search.");
 }
 
+async function handleDeleteAllClick() {
+  if (allMediaItems.length === 0) {
+    return;
+  }
+
+  const shouldDelete = window.confirm(
+    "Delete every item from the library? Your media files will not be deleted."
+  );
+
+  if (!shouldDelete) {
+    return;
+  }
+
+  deleteAllButton.disabled = true;
+  appStatus.classList.remove("status-message--error");
+  appStatus.textContent = "Deleting library items...";
+
+  try {
+    const response = await fetch("/api/media", { method: "DELETE" });
+    const deleteData = await response.json();
+
+    if (!response.ok) {
+      throw new Error(deleteData.error || "The library could not be cleared.");
+    }
+
+    allMediaItems = [];
+    searchInput.value = "";
+    renderMediaItems(allMediaItems);
+    appStatus.textContent = `Deleted ${deleteData.deletedCount} library items. Your media files were not changed.`;
+  } catch (error) {
+    console.error("Unable to clear media library:", error);
+    appStatus.classList.add("status-message--error");
+    appStatus.textContent = error.message;
+    deleteAllButton.disabled = false;
+  }
+}
+
 async function loadMediaItems() {
   try {
     const response = await fetch("/api/media");
@@ -220,6 +259,7 @@ async function loadMediaItems() {
 }
 
 searchInput.addEventListener("input", handleSearchInput);
+deleteAllButton.addEventListener("click", handleDeleteAllClick);
 scanForm.addEventListener("submit", handleScanSubmit);
 importButton.addEventListener("click", handleImportClick);
 loadMediaItems();

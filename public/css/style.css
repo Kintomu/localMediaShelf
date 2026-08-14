@@ -142,6 +142,43 @@ h1 {
   width: 100%;
 }
 
+.library-header {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.library-header h2 {
+  margin-bottom: 0;
+}
+
+.danger-button {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1px solid #ef4444;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  color: #fca5a5;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.danger-button:hover {
+  background-color: #7f1d1d;
+  color: #fee2e2;
+}
+
+.danger-button:focus-visible {
+  outline: 2px solid #fca5a5;
+  outline-offset: 3px;
+}
+
+.danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .library-controls {
   max-width: 30rem;
   margin-bottom: 1rem;
@@ -371,6 +408,16 @@ h1 {
   }
 
   .scan-preview-actions button {
+    width: auto;
+  }
+
+  .library-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .danger-button {
     width: auto;
   }
 

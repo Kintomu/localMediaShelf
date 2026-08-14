@@ -184,6 +184,22 @@ app.get("/api/media", async (request, response) => {
   }
 });
 
+app.delete("/api/media", async (request, response) => {
+  try {
+    const mediaItems = await readMediaItems();
+
+    await writeMediaFile(localMediaFilePath, []);
+
+    return response.json({
+      deletedCount: mediaItems.length,
+      totalCount: 0
+    });
+  } catch (error) {
+    console.error("Unable to delete media data:", error);
+    return response.status(500).json({ error: "Unable to clear the media library." });
+  }
+});
+
 app.get("/api/media/:id", async (request, response) => {
   const mediaId = Number(request.params.id);
 
