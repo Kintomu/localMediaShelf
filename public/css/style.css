@@ -78,7 +78,8 @@ h1 {
   outline-offset: 2px;
 }
 
-.scan-controls button {
+.scan-controls button,
+.scan-preview-actions button {
   padding: 0.75rem 1rem;
   border: 0;
   border-radius: 0.5rem;
@@ -89,16 +90,19 @@ h1 {
   cursor: pointer;
 }
 
-.scan-controls button:hover {
+.scan-controls button:hover,
+.scan-preview-actions button:hover {
   background-color: #f59e0b;
 }
 
-.scan-controls button:focus-visible {
+.scan-controls button:focus-visible,
+.scan-preview-actions button:focus-visible {
   outline: 2px solid #fbbf24;
   outline-offset: 3px;
 }
 
-.scan-controls button:disabled {
+.scan-controls button:disabled,
+.scan-preview-actions button:disabled {
   cursor: wait;
   opacity: 0.6;
 }
@@ -126,6 +130,16 @@ h1 {
 .scan-source-type {
   color: #9ca3af;
   white-space: nowrap;
+}
+
+.scan-preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.scan-preview-actions button {
+  width: 100%;
 }
 
 .library-controls {
@@ -354,6 +368,10 @@ h1 {
 
   .scan-controls {
     grid-template-columns: 1fr auto;
+  }
+
+  .scan-preview-actions button {
+    width: auto;
   }
 
   .tmdb-content {

@@ -7,8 +7,10 @@ const scanButton = document.querySelector("#scan-button");
 const scanStatus = document.querySelector("#scan-status");
 const scanPreview = document.querySelector("#scan-preview");
 const scanResults = document.querySelector("#scan-results");
+const importButton = document.querySelector("#import-button");
 
 let allMediaItems = [];
+let scannedDirectoryPath = "";
 
 function filterMedia(mediaItems, searchTerm) {
   const normalizedSearchTerm = searchTerm.trim().toLowerCase();
@@ -56,6 +58,7 @@ function renderScanPreview(candidates) {
     scanResults.append(listItem);
   });
 
+  importButton.textContent = `Import all ${candidates.length} candidates`;
   scanPreview.hidden = false;
   scanStatus.textContent = `Found ${candidates.length} candidates. Nothing has been saved yet.`;
 }
@@ -65,6 +68,7 @@ async function handleScanSubmit(event) {
 
   const directoryPath = scanPathInput.value.trim();
 
+  scannedDirectoryPath = "";
   scanStatus.classList.remove("status-message--error");
   scanPreview.hidden = true;
 
@@ -89,6 +93,7 @@ async function handleScanSubmit(event) {
       throw new Error(scanData.error || "The folder could not be scanned.");
     }
 
+    scannedDirectoryPath = scanData.directoryPath;
     renderScanPreview(scanData.candidates);
   } catch (error) {
     console.error("Unable to scan media folder:", error);
@@ -96,6 +101,42 @@ async function handleScanSubmit(event) {
     scanStatus.textContent = error.message;
   } finally {
     scanButton.disabled = false;
+  }
+}
+
+async function handleImportClick() {
+  if (scannedDirectoryPath === "") {
+    scanStatus.classList.add("status-message--error");
+    scanStatus.textContent = "Scan a folder before importing media.";
+    return;
+  }
+
+  scanStatus.classList.remove("status-message--error");
+  scanButton.disabled = true;
+  importButton.disabled = true;
+  scanStatus.textContent = "Importing media...";
+
+  try {
+    const response = await fetch("/api/media/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ directoryPath: scannedDirectoryPath })
+    });
+    const importData = await response.json();
+
+    if (!response.ok) {
+      throw new Error(importData.error || "The media could not be imported.");
+    }
+
+    scanStatus.textContent = `Imported ${importData.importedCount} new items. Library now has ${importData.totalCount} items.`;
+    await loadMediaItems();
+  } catch (error) {
+    console.error("Unable to import media:", error);
+    scanStatus.classList.add("status-message--error");
+    scanStatus.textContent = error.message;
+  } finally {
+    scanButton.disabled = false;
+    importButton.disabled = false;
   }
 }
 
@@ -180,4 +221,5 @@ async function loadMediaItems() {
 
 searchInput.addEventListener("input", handleSearchInput);
 scanForm.addEventListener("submit", handleScanSubmit);
+importButton.addEventListener("click", handleImportClick);
 loadMediaItems();
