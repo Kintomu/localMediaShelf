@@ -7,6 +7,7 @@ const path = require("path");
 const app = express();
 const port = process.env.PORT || 3000;
 const mediaFilePath = path.join(__dirname, "data", "media.json");
+const supportedScanExtensions = new Set([".iso", ".mp4"]);
 
 app.use(express.json());
 
@@ -18,6 +19,24 @@ async function readMediaItems() {
 async function writeMediaItems(mediaItems) {
   const mediaFile = JSON.stringify(mediaItems, null, 2);
   await fs.writeFile(mediaFilePath, `${mediaFile}\n`, "utf8");
+}
+
+function formatScannedTitle(itemName, removeExtension) {
+  const titleSource = removeExtension ? path.parse(itemName).name : itemName;
+
+  return titleSource
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function isBluRayDirectory(directoryPath) {
+  try {
+    const bdmvStats = await fs.stat(path.join(directoryPath, "BDMV"));
+    return bdmvStats.isDirectory();
+  } catch (error) {
+    return false;
+  }
 }
 
 async function updateMediaStatus(request, response, statusName) {
@@ -91,6 +110,72 @@ app.post("/api/media/:id/watched", (request, response) => {
 
 app.post("/api/media/:id/favorite", (request, response) => {
   return updateMediaStatus(request, response, "favorite");
+});
+
+app.post("/api/media/scan", async (request, response) => {
+  const requestedPath = request.body ? request.body.directoryPath : "";
+  const directoryPath = typeof requestedPath === "string"
+    ? requestedPath.trim()
+    : "";
+
+  if (directoryPath === "") {
+    return response.status(400).json({ error: "A directory path is required." });
+  }
+
+  if (!path.isAbsolute(directoryPath)) {
+    return response.status(400).json({ error: "Directory path must be absolute." });
+  }
+
+  try {
+    const directoryEntries = await fs.readdir(directoryPath, {
+      withFileTypes: true
+    });
+    const candidates = [];
+
+    for (const entry of directoryEntries) {
+      const sourcePath = path.join(directoryPath, entry.name);
+      const extension = path.extname(entry.name).toLowerCase();
+
+      if (entry.isFile() && supportedScanExtensions.has(extension)) {
+        candidates.push({
+          title: formatScannedTitle(entry.name, true),
+          type: "movie",
+          sourceType: extension.slice(1),
+          sourcePath
+        });
+      }
+
+      if (entry.isDirectory() && await isBluRayDirectory(sourcePath)) {
+        candidates.push({
+          title: formatScannedTitle(entry.name, false),
+          type: "movie",
+          sourceType: "bluray-folder",
+          sourcePath
+        });
+      }
+    }
+
+    candidates.sort((firstItem, secondItem) => {
+      return firstItem.title.localeCompare(secondItem.title);
+    });
+
+    return response.json({
+      directoryPath,
+      count: candidates.length,
+      candidates
+    });
+  } catch (error) {
+    if (error.code === "ENOENT" || error.code === "ENOTDIR") {
+      return response.status(400).json({ error: "Directory could not be found." });
+    }
+
+    if (error.code === "EACCES" || error.code === "EPERM") {
+      return response.status(403).json({ error: "Directory cannot be accessed." });
+    }
+
+    console.error("Unable to scan media directory:", error);
+    return response.status(500).json({ error: "Unable to scan media directory." });
+  }
 });
 
 app.get("/api/tmdb/search", async (request, response) => {
