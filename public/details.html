@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Details | Local Media Shelf</title>
+    <link rel="stylesheet" href="/css/style.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <a class="back-link" href="/">&larr; Back to library</a>
+
+      <p id="details-status" class="status-message" role="status">
+        Loading media details...
+      </p>
+
+      <article id="media-details" class="media-details" hidden>
+        <h1 id="media-title"></h1>
+        <p class="media-details__summary">
+          <span id="media-type"></span>
+          &middot;
+          <span id="media-genre"></span>
+        </p>
+
+        <dl class="media-facts">
+          <div>
+            <dt>Watched</dt>
+            <dd id="watched-status"></dd>
+          </div>
+          <div>
+            <dt>Favorite</dt>
+            <dd id="favorite-status"></dd>
+          </div>
+        </dl>
+      </article>
+    </main>
+
+    <script src="/js/details.js"></script>
+  </body>
+</html>

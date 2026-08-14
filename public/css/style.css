@@ -81,10 +81,24 @@ h1 {
 }
 
 .media-card {
+  display: block;
   padding: 1.25rem;
   border: 1px solid #374151;
   border-radius: 0.75rem;
   background-color: #1f2937;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.media-card:hover {
+  border-color: #fbbf24;
+  transform: translateY(-2px);
+}
+
+.media-card:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 3px;
 }
 
 .media-card__details {
@@ -108,6 +122,44 @@ h1 {
 .media-card__status--active {
   background-color: #92400e;
   color: #fef3c7;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 2rem;
+  color: #fbbf24;
+}
+
+.media-details {
+  max-width: 40rem;
+  padding: 1.5rem;
+  border: 1px solid #374151;
+  border-radius: 0.75rem;
+  background-color: #1f2937;
+}
+
+.media-details__summary {
+  color: #d1d5db;
+}
+
+.media-facts {
+  margin: 2rem 0 0;
+}
+
+.media-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid #374151;
+}
+
+.media-facts dt {
+  font-weight: bold;
+}
+
+.media-facts dd {
+  margin: 0;
 }
 
 @media (min-width: 48rem) {

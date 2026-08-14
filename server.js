@@ -44,6 +44,10 @@ app.get("/api/media/:id", async (request, response) => {
   }
 });
 
+app.get("/details/:id", (request, response) => {
+  response.sendFile(path.join(__dirname, "public", "details.html"));
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.listen(port, () => {

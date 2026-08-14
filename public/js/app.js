@@ -29,8 +29,9 @@ function createStatusBadge(label, isActive) {
 }
 
 function createMediaCard(mediaItem) {
-  const card = document.createElement("article");
+  const card = document.createElement("a");
   card.className = "media-card";
+  card.href = `/details/${mediaItem.id}`;
 
   const title = document.createElement("h3");
   title.textContent = mediaItem.title;
