@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const fs = require("fs/promises");
 const path = require("path");
@@ -89,6 +91,68 @@ app.post("/api/media/:id/watched", (request, response) => {
 
 app.post("/api/media/:id/favorite", (request, response) => {
   return updateMediaStatus(request, response, "favorite");
+});
+
+app.get("/api/tmdb/search", async (request, response) => {
+  const query = typeof request.query.query === "string"
+    ? request.query.query.trim()
+    : "";
+  const type = request.query.type;
+
+  if (query === "") {
+    return response.status(400).json({ error: "A search query is required." });
+  }
+
+  if (type !== "movie" && type !== "tv") {
+    return response.status(400).json({ error: "Type must be movie or tv." });
+  }
+
+  if (!process.env.TMDB_API_KEY) {
+    return response.status(500).json({ error: "TMDB API key is not configured." });
+  }
+
+  const searchParameters = new URLSearchParams({
+    api_key: process.env.TMDB_API_KEY,
+    query,
+    include_adult: "false",
+    language: "en-US",
+    page: "1"
+  });
+  const tmdbUrl = `https://api.themoviedb.org/3/search/${type}?${searchParameters}`;
+
+  try {
+    const tmdbResponse = await fetch(tmdbUrl);
+
+    if (!tmdbResponse.ok) {
+      console.error("TMDB request failed with status:", tmdbResponse.status);
+      return response.status(502).json({ error: "TMDB request failed." });
+    }
+
+    const tmdbData = await tmdbResponse.json();
+    const result = tmdbData.results[0];
+
+    if (!result) {
+      return response.status(404).json({ error: "No TMDB match was found." });
+    }
+
+    const resultTitle = type === "tv" ? result.name : result.title;
+    const releaseDate = type === "tv"
+      ? result.first_air_date
+      : result.release_date;
+
+    return response.json({
+      tmdbId: result.id,
+      title: resultTitle || "",
+      overview: result.overview || "",
+      releaseDate: releaseDate || "",
+      rating: typeof result.vote_average === "number" ? result.vote_average : null,
+      posterPath: result.poster_path || null,
+      type
+    });
+  } catch (error) {
+    console.error("Unable to reach TMDB:", error);
+    return response.status(502).json({ error: "Unable to reach TMDB." });
+  }
 });
 
 app.get("/details/:id", (request, response) => {
